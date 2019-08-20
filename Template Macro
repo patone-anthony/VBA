@@ -1,0 +1,127 @@
+Public i, LastRow, LR As Long
+Public rng, rng1, filter_rng As Range
+Public SPath, sFile As String
+Public wbData, wb As Workbook
+Public WsData, wsMonth As Worksheet
+
+Sub cc_macro()
+
+Application.ScreenUpdating = False
+
+ActiveSheet.Name = "data"
+Set wbData = ActiveWorkbook
+Set WsData = ActiveSheet
+
+today = Format(Date, "mm-dd-yyyy")
+LastDay = DateSerial(Year(Date), Month(Date), 0)
+FirstDay = LastDay - Day(LastDay) + 1
+
+previous_month = MonthName(Month(DateAdd("m", -1, Date)), False)
+reporting_year = Year(DateAdd("m", -1, Date))
+month_number = Month(Date) - 1
+
+SPath = "XXX"
+
+MkDir "S:XXX"\" & month_number & ". " & previous_month & "\XXX"
+
+wbData.SaveAs Filename:="S:XXX\" & reporting_year & "\" & month_number & ". " & previous_month & _
+"\XXX (" & today & ").xlsx"
+
+With WsData
+    .Range("$A$1:$CU$20000").AutoFilter Field:=10, Criteria1:="<=12/31/2018"
+    Rows("2:2").Select
+    Range(Selection, Selection.End(xlDown)).Select
+    Selection.Delete Shift:=xlUp
+    .ShowAllData
+    Range("A1").Select
+
+    Range("CS1").Value = "Action Taken Roll up"
+    Range("CT1").Value = "CIB LOB"
+    Range("CU1").Value = "CIB Sub LOB"
+  
+    Columns("Y").Replace what:="NAMR", Replacement:="NAM"
+    Columns("Y").Replace what:="LAMR", Replacement:="LATAM"
+    Columns("Y").Replace what:="ASIA", Replacement:="APAC"
+    Columns("G").Replace what:="NAMR", Replacement:="NAM"
+    Columns("G").Replace what:="LAMR", Replacement:="LATAM"
+    Columns("G").Replace what:="ASIA", Replacement:="APAC"
+    Columns("AA").Replace what:="XXX", Replacement:="XXX"
+    Columns("AA").Replace what:="CORPORATE SECTOR", Replacement:="Corp Sector"
+    Columns("AA").Replace what:="XXX", Replacement:="XXX"
+    Columns("AA").Replace what:="XXXS", Replacement:="XXX"
+    Columns("AA").Replace what:="XXX", Replacement:="XXX"
+    Columns("AA").Replace what:="XXX", Replacement:="XXX"
+End With
+
+LastRow = Range("A" & Rows.Count).End(xlUp).Row
+    
+    For i = 2 To LastRow
+        If Range("AL" & i).Value = "XXX" Then
+            Range("AA" & i).Value = "XXX"
+            
+        ElseIf Range("AN" & i).Value = "XXXS" Then
+            Range("AA" & i).Value = "XXX"
+
+        ElseIf Range("AN" & i).Value = "XXX" Then
+            Range("AA" & i).Value = "XXX"
+        
+        ElseIf Range("AL" & i).Value = "XXX" Then
+            Range("AA" & i).Value = "XXX"
+        
+        ElseIf Range("AN" & i).Value = "XXX" Then
+            Range("AA" & i).Value = "XXX"
+        
+        ElseIf Range("AN" & i).Value = "XXX" Then
+            Range("AA" & i).Value = "XXX"
+                 End If
+     Next i
+
+Sheets.Add After:=ActiveSheet
+ActiveSheet.Name = previous_month
+Set wsMonth = ActiveSheet
+
+With WsData
+    .Activate
+    .Range("$A$1:$CU$20000").AutoFilter Field:=87, Operator:=xlFilterValues, Criteria2:=Array(1, FirstDay)
+    .Range("$A$1:$CU$20000").AutoFilter Field:=8, Criteria1:="XXX"
+    Range(Selection, Selection.End(xlToRight)).Select
+    Range(Selection, Selection.End(xlDown)).Select
+    Selection.Copy
+End With
+
+wsMonth.Paste
+
+Set rng = Range("C3:C" & last_row) 'in wsTemp
+ 
+ 
+ 'loop through filtered data
+ 
+    For Each cell In rng
+        If cell.Value = "" Then
+            row_number = cell.Row
+            target_number = row_number - 2
+            wbData.Activate
+            Range("C1").Select
+            row_index = 0
+            For Each r In filter_rng.Rows
+                If Not r.Hidden Then
+                    row_index = row_index + 1
+                    ActiveCell.Offset(1, 0).Select
+                    Do Until ActiveCell.EntireRow.Hidden = False
+                    ActiveCell.Offset(1, 0).Select
+                    Loop
+                    
+                    If target_number = row_index Then
+                        ActiveCell.Copy
+                        wbTemp.Activate
+                        Range("C" & row_number).PasteSpecial
+                        ActiveCell = UCase(ActiveCell)
+                        Exit For
+                    End If
+                End If
+           Next r
+        End If
+     Next cell
+
+
+
